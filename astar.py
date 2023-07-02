@@ -11,6 +11,12 @@ class Estacao():
         self.f = 0
     def set_g(self,num):
         self.g = num
+    def set_h(self,num):
+        self.h = num
+    def set_f(self,num):
+        self.f = num
+
+
 def baldeacao(linha1,linha2):
     if linha1== linha2:
         return False  
@@ -22,20 +28,38 @@ def compara_visitados(visitados, estacao, linha):
             return False
     
     return True
-def astar (e_inicial,e_final):
-    fronteira = [e_incial]
-    visitados = []
-    e_atual = None
-    def compara_linha(e_x,e_y):
+def distancia(na,nf):
+    return distancia_diretas[na-1][nf-1]
+def att_g(aux,tempo,e_atual):
+    aux.set_g(tempo + e_atual.g)
+
+def att_h(aux,e_final):
+    na = int(aux.nome.split('E')[1])
+    nf = int(e_final.nome.split('E')[1])
+    if na > nf:
+        nf,na = na, nf
+    
+    d = distancia(na,nf)
+    aux.set_h(d)
+def att_f(aux):
+    aux.set_f(aux.g+aux.h)
+def compara_linha(e_x,e_y):
         
         for i in range(len(e_x)):
             for j in range(len(e_y)):
                 if e_x[i] == e_y[j]:
                     
                     return e_x[i]
+                
+def astar (e_inicial,e_final):
+    fronteira = [e_incial]
+    visitados = []
+    e_atual = fronteira[0]
+
+   
            
     index = 0
-    while index != 3:
+    while e_atual.nome != e_final.nome and e_atual.linha != e_final.linha:
         e_atual = fronteira[0]
         
         e_num =e_atual.nome.split('E')[1]
@@ -49,22 +73,24 @@ def astar (e_inicial,e_final):
                 print(f"vizinho: {estacao}")
                 aux = Estacao(estacao,linha)
                 if baldeacao(linha, e_atual.linha):
-                    aux.set_g(tempo + e_atual.g + 4)
+                    att_g(aux,tempo + 4,e_atual)
                 else:
-                    aux.set_g(tempo + e_atual.g)
+                    att_g(aux,tempo,e_atual)
+                att_h(aux,e_final)
+                att_f(aux)
                 fronteira.append(aux)
-        fronteira.sort(key=lambda x:x.g)
+        fronteira.sort(key=lambda x:x.f)
         
         visitados.append(e_atual)
-        index+=1
+        
         for i in visitados:
             print(f"visitados: {i.nome, i.linha}")
         for i in fronteira:
-            print(f"estacao: {i.nome}, linha: {i.linha}, valor g: {i.g}")
-     
+            print(f"estacao: {i.nome}, linha: {i.linha}, valor g: {i.g}, valor h: {i.h}, valor f: {i.f}")
+
     
 e_incial = Estacao('E12','verde')
-e_final = Estacao('E7','amarelo')
+e_final = Estacao('E5','amarela')
 matriz_Adjacencia = [[('E2',20)],
                      [('E3',17),('E9',20),('E10',7),('E1',20)],                                                    
                      [('E4',12.6),('E9',18.8),('E13',37.4),('E2',17)],
@@ -95,21 +121,23 @@ linhas = {"E1": ["azul"],
             "E13": ["verde", "vermelha"],
             "E14": ["verde"],}
 
-diretas = [
-            [ 0, 10, 18.5, 24.8, 36.4, 38.8, 35.8, 25.4, 17.6,  9.1, 16.7, 27.3, 27.6, 29.8],
-            [-1,  0,  8.5, 14.8, 26.6, 29.1, 26.1, 17.3,   10,  3.5, 15.5, 20.9, 19.1, 21.8],
-            [-1, -1,    0,  6.3, 18.2, 20.6, 17.6, 13.6,  9.4, 10.3, 19.5, 19.1, 12.1, 16.6],
-            [-1, -1,   -1,    0,   12, 14.4, 11.5, 12.4, 12.6, 16.7, 23.6, 18.6, 10.6, 15.4],
-            [-1, -1,   -1,   -1,    0,    3,  2.4, 19.6, 23.3, 28.2, 34.2, 24.8, 14.5, 17.9],
-            [-1, -1,   -1,   -1,   -1,    0,  3.3, 22.3, 25.7, 30.3, 36.7, 27.6, 15.2, 18.2],
-            [-1, -1,   -1,   -1,   -1,   -1,    0,   20,   23, 27.3, 34.2, 25.7, 12.4, 15.6],
-            [-1, -1,   -1,   -1,   -1,   -1,   -1,    0,  8.2, 20.3, 16.1,  6.4, 22.7, 27.6],
-            [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 13.5, 11.2, 10.9, 21.2, 26.6],
-            [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 17.6, 24.2, 18.7, 21.2],
-            [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 14.2, 31.5, 35.5],
-            [-1, -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 28.8, 33.6],
-            [-1, -1,   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,    0,  5.1],
-            [-1, -1,   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,   -1,    0],
-        ]
-print(diretas*2)
-#astar(e_incial,e_final)
+
+
+distancia_diretas = [
+            [0, 20, 37.0, 49.6, 72.8, 77.6, 71.6, 50.8, 35.2, 18.2, 33.4, 54.6, 55.2, 59.6],
+            [-1, 0, 17.0, 29.6, 53.2, 58.2, 52.2, 34.6,   20,  7.0, 31.0, 41.8, 38.2, 43.6],
+            [-1, -1,   0, 12.6, 36.4, 41.2, 35.2, 27.2, 18.8, 20.6, 39.0, 38.2, 24.2, 33.2], 
+            [-1, -1,  -1,    0,   24, 28.8, 23.0, 24.8, 25.2, 33.4, 47.2, 37.2, 21.2, 30.8],
+            [-1, -1,  -1,   -1,    0,    6,  4.8, 39.2, 46.6, 56.4, 68.4, 49.6, 29.0, 35.8],
+            [-1, -1,  -1,  - 1,   -1,    0,  6.6, 44.6, 51.4, 60.6, 73.4, 55.2, 30.4, 36.4], 
+            [-1, -1,  -1,   -1,   -1,   -1,    0,   40,   46, 54.6, 68.4, 51.4, 24.8, 31.2],
+            [-1, -1,  -1,   -1,   -1,   -1,   -1,    0, 16.4, 40.6, 32.2, 12.8, 45.4, 55.2], 
+            [-1, -1,  -1,   -1,   -1,   -1,   -1,   -1,    0, 27.0, 22.4, 21.8, 42.4, 53.2],
+            [-1, -1,  -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 35.2, 48.4, 37.4, 42.4], 
+            [-1, -1,  -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 28.4, 63.0, 71.0], 
+            [-1, -1,  -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0, 57.6, 67.2], 
+            [-1, -1,  -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,    0, 10.2], 
+            [-1, -1,  -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,   -1,    0]
+            ] 
+
+astar(e_incial,e_final)
