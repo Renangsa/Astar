@@ -1,11 +1,11 @@
 class Estacao():
     
 
-    def __init__(self, nome, linha=None):
+    def __init__(self, nome, linha=None, pai = None):
         
         self.nome = nome
         self.linha = linha
-
+        self.pai = pai
         self.g = 0
         self.h = 0
         self.f = 0
@@ -16,6 +16,18 @@ class Estacao():
     def set_f(self,num):
         self.f = num
 
+def caminho(estacao_final,e_inicial):
+    v_caminho = []
+    while estacao_final.pai != None:
+        v_caminho.append(estacao_final)
+        estacao_final = estacao_final.pai
+    v_caminho.append(e_inicial)
+    return v_caminho
+
+def print_caminho(caminho):
+    print('-------------Caminho-------------')
+    for i,estacao in enumerate(caminho[::-1]):
+        print(f"{i+1} - Estacao: {estacao.nome} / Linha: {estacao.linha}")
 
 def baldeacao(linha1,linha2):
     if linha1== linha2:
@@ -28,8 +40,10 @@ def compara_visitados(visitados, estacao, linha):
             return False
     
     return True
+
 def distancia(na,nf):
     return distancia_diretas[na-1][nf-1]
+
 def att_g(aux,tempo,e_atual):
     aux.set_g(tempo + e_atual.g)
 
@@ -41,6 +55,7 @@ def att_h(aux,e_final):
     
     d = distancia(na,nf)
     aux.set_h(d)
+
 def att_f(aux):
     aux.set_f(aux.g+aux.h)
 def compara_linha(e_x,e_y):
@@ -52,13 +67,15 @@ def compara_linha(e_x,e_y):
                     return e_x[i]
                 
 def astar (e_inicial,e_final):
+    att_h(e_incial,e_final)
+    att_f(e_inicial)
+    
     fronteira = [e_incial]
     visitados = []
     e_atual = fronteira[0]
 
    
            
-    index = 0
     while e_atual.nome != e_final.nome and e_atual.linha != e_final.linha:
         e_atual = fronteira[0]
         
@@ -71,7 +88,7 @@ def astar (e_inicial,e_final):
             linha = compara_linha(linhas[estacao],linhas[e_atual.nome])
             if compara_visitados(visitados,estacao,linha):
                 print(f"vizinho: {estacao}")
-                aux = Estacao(estacao,linha)
+                aux = Estacao(estacao,linha,e_atual)
                 if baldeacao(linha, e_atual.linha):
                     att_g(aux,tempo + 4,e_atual)
                 else:
@@ -87,10 +104,10 @@ def astar (e_inicial,e_final):
             print(f"visitados: {i.nome, i.linha}")
         for i in fronteira:
             print(f"estacao: {i.nome}, linha: {i.linha}, valor g: {i.g}, valor h: {i.h}, valor f: {i.f}")
-
+    print_caminho(caminho(fronteira[0],e_incial))
     
 e_incial = Estacao('E12','verde')
-e_final = Estacao('E5','amarela')
+e_final = Estacao('E7','amarela')
 matriz_Adjacencia = [[('E2',20)],
                      [('E3',17),('E9',20),('E10',7),('E1',20)],                                                    
                      [('E4',12.6),('E9',18.8),('E13',37.4),('E2',17)],
