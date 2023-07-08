@@ -1,7 +1,7 @@
 class Estacao():
     
 
-    def __init__(self, nome, linha=None, pai = None):
+    def __init__(self, nome, linha=None, pai = None): #func de inicialização
         
         self.nome = nome
         self.linha = linha
@@ -16,47 +16,44 @@ class Estacao():
     def set_f(self,num):
         self.f = num
 
-def caminho(estacao_final,e_inicial):
-    v_caminho = []
+def caminho(estacao_final,estacao_inicial): #func que retorna o melhor caminho dado uma e_inicial e uma e_final
+    melhor_caminho = []
     while estacao_final.pai != None:
-        v_caminho.append(estacao_final)
+        melhor_caminho.append(estacao_final)
         estacao_final = estacao_final.pai
-    v_caminho.append(e_inicial)
-    return v_caminho
+    melhor_caminho.append(estacao_inicial)
+    return melhor_caminho
 
-def print_caminho(caminho):
+def print_caminho(caminho): 
     print('-------------Caminho-------------')
     for i,estacao in enumerate(caminho[::-1]):
         print(f"{i+1} - Estacao: {estacao.nome} / Linha: {estacao.linha}")
 
-def baldeacao(linha1,linha2):
-    if linha1== linha2:
-        return False  
-    return True
+def baldeacao(linha1,linha2): #Se houver troca de linha, ocorre a baldeação
+    return linha1 != linha2
 #estacao, distancia em tempo
-def compara_visitados(visitados, estacao, linha):
-    for i in visitados:
+def compara_pontos_visitados(pontos_visitados, estacao, linha):
+    for i in pontos_visitados:
         if i.nome == estacao and i.linha == linha:
             return False
-    
     return True
 
-def distancia(na,nf):
-    return distancia_diretas[na-1][nf-1]
+def distancia(no_atual,no_final):
+    return distancia_diretas[no_atual-1][no_final-1]
 
-def att_g(aux,tempo,e_atual):
+def att_g(aux,tempo,e_atual): #atualiza a função g
     aux.set_g(tempo + e_atual.g)
 
-def att_h(aux,e_final):
-    na = int(aux.nome.split('E')[1])
-    nf = int(e_final.nome.split('E')[1])
-    if na > nf:
-        nf,na = na, nf
+def att_h(aux,e_final): #atualiza a função heurística h
+    no_atual = int(aux.nome.split('E')[1])
+    no_final = int(e_final.nome.split('E')[1])
+    if no_atual > no_final:
+        no_final,no_atual = no_atual, no_final
     
-    d = distancia(na,nf)
+    d = distancia(no_atual,no_final)
     aux.set_h(d)
 
-def att_f(aux):
+def att_f(aux): #atualiza a função f
     aux.set_f(aux.g+aux.h)
 def compara_linha(e_x,e_y):
         
@@ -66,28 +63,26 @@ def compara_linha(e_x,e_y):
                     
                     return e_x[i]
                 
-def astar (e_inicial,e_final):
+def astar (e_inicial,e_final): #func de execução do algoritmo A*
     att_h(e_incial,e_final)
     att_f(e_inicial)
     
     fronteira = [e_incial]
-    visitados = []
+    pontos_visitados = []
     e_atual = fronteira[0]
-
-   
            
     while e_atual.nome != e_final.nome and e_atual.linha != e_final.linha:
         e_atual = fronteira[0]
         
         e_num =e_atual.nome.split('E')[1]
         del fronteira[0]
-        print(f"tamanho da fronteira {len(fronteira)}")
+        print(f"Tamanho da fronteira: {len(fronteira)}")
         
-        print(f"Numero da estacao atual {e_num}")
+        print(f"Numero da estacao atual: E{e_num}")
         for estacao, tempo in matriz_Adjacencia[int(e_num) - 1]:
             linha = compara_linha(linhas[estacao],linhas[e_atual.nome])
-            if compara_visitados(visitados,estacao,linha):
-                print(f"vizinho: {estacao}")
+            if compara_pontos_visitados(pontos_visitados,estacao,linha):
+                print(f"Vizinho: {estacao}")
                 aux = Estacao(estacao,linha,e_atual)
                 if baldeacao(linha, e_atual.linha):
                     att_g(aux,tempo + 4,e_atual)
@@ -98,14 +93,15 @@ def astar (e_inicial,e_final):
                 fronteira.append(aux)
         fronteira.sort(key=lambda x:x.f)
         
-        visitados.append(e_atual)
+        pontos_visitados.append(e_atual)
         
-        for i in visitados:
-            print(f"visitados: {i.nome, i.linha}")
+        for i in pontos_visitados:
+            print(f"Pontos visitados: {i.nome, i.linha}")
         for i in fronteira:
-            print(f"estacao: {i.nome}, linha: {i.linha}, valor g: {i.g}, valor h: {i.h}, valor f: {i.f}")
+            print(f"Estacao: {i.nome}, Linha: {i.linha}, Valor g: {i.g}, Valor h: {i.h}, Valor f: {i.f}")
     print_caminho(caminho(fronteira[0],e_incial))
-    
+
+#início do programa
 e_incial = Estacao('E12','verde')
 e_final = Estacao('E7','amarela')
 matriz_Adjacencia = [[('E2',20)],
@@ -157,4 +153,4 @@ distancia_diretas = [
             [-1, -1,  -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,   -1,    0]
             ] 
 
-astar(e_incial,e_final)
+astar(e_incial,e_final) #chamada do algoritmo A*
